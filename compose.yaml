@@ -23,3 +23,9 @@ services:
 #      - 'SPRING_DATASOURCE_PASSWORD=secret'
 #      - 'SPRING_JPA_HIBERNATE_DDL_AUTO=update'
 #    restart: always
+#    networks:
+#      - spring-subnet
+
+networks:
+  spring-subnet:
+    driver: bridge

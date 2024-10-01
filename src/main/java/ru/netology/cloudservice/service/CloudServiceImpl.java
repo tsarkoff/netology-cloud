@@ -25,19 +25,20 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @CloudExceptionHandlerAdvice
 public class CloudServiceImpl implements CloudService {
-    private final static String AUTH_TOKEN_SAMPLE = "lex34pou5p9834u5n3span394u58u09";
     private final Storage storage;
     private final AppProps props;
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
 
-    public ResponseEntity<?> login(User.Credentials credentials) {
+    // public ResponseEntity<?> login(User.Credentials credentials) {
+    public ResponseEntity<User.Token> login(User.Credentials credentials) {
         String login = credentials.getLogin();
         Optional<User> user = userRepository.findUserByCredentialsLoginIgnoreCase(login);
         if (user.isEmpty() || !user.get().getCredentials().getPassword().equals(credentials.getPassword()))
             throw new UserNotAuthorizedException(Ops.LOGIN_FAILED, credentials.getLogin());
         if (user.get().getToken().getAuthToken().isEmpty()) {
-            user.get().getToken().setAuthToken(AUTH_TOKEN_SAMPLE); // needs to generate token (e.g. md5 on usr/pwd, or use OAuth2?)
+            String authToken = AuthTokenGenerator.generateNewToken();
+            user.get().getToken().setAuthToken(authToken);
             userRepository.save(user.get());
         }
         return ResponseEntity.ok().body(user.get().getToken());
@@ -46,15 +47,16 @@ public class CloudServiceImpl implements CloudService {
     @Override
     public ResponseEntity<Error> logout(Optional<String> token) {
         ResponseEntity<Error> response = validateToken(token);
-        if (response.getStatusCode().equals(HttpStatus.OK)) {
-            User user = userRepository.findUserByTokenAuthToken(fitToken(token.get())).get();
-            user.getToken().invalidateToken(userRepository, user);
+        if (response.getStatusCode().equals(HttpStatus.OK) && token.isPresent()) {
+            Optional<User> user = userRepository.findUserByTokenAuthToken(fitToken(token.get()));
+            user.ifPresent(usr -> usr.getToken().invalidateToken(userRepository, usr));
         }
         return response;
     }
 
     @Override
-    public ResponseEntity<?> getItemList(Optional<Integer> limit, Optional<String> token) {
+    // public ResponseEntity<?> getItemList(Optional<Integer> limit, Optional<String> token) {
+    public ResponseEntity<List<Item.File>> getItemList(Optional<Integer> limit, Optional<String> token) {
         validateToken(token);
         List<Item> items = itemRepository.findItemByOrderByFileSizeAsc(limit.map(Limit::of).orElseGet(Limit::unlimited));
         List<Item.File> files = items.stream().map(Item::getFile).toList();
@@ -62,7 +64,8 @@ public class CloudServiceImpl implements CloudService {
     }
 
     @Override
-    public ResponseEntity<?> downloadItem(String filename, Optional<String> token) {
+    // public ResponseEntity<?> downloadItem(String filename, Optional<String> token) {
+    public ResponseEntity<Object> downloadItem(String filename, Optional<String> token) {
         validateToken(token);
         if (itemRepository.findItemByFileFilename(filename).isEmpty())
             throw new FileNotFoundInDatabaseException(Ops.FILE_DOWNLOAD, filename);
@@ -110,11 +113,13 @@ public class CloudServiceImpl implements CloudService {
     }
 
     private ResponseEntity<Error> validateToken(Optional<String> token) {
+        if (!props.isCheckAuthToken())
+            return ResponseEntity.ok().body(new Error("Request auth success (App.Props skips auth token verification)"));
         if (token.isEmpty())
             throw new TokenNotFoundException(Ops.TOKEN_HEADER_ABSENT, "NULL");
         if (userRepository.findUserByTokenAuthToken(fitToken(token.get())).isEmpty())
             throw new TokenNotFoundException(Ops.TOKEN_NOT_FOUND_IN_DB, token.get());
-        return ResponseEntity.ok().body(new Error("Request success (auth token recognized) user: " + token.get()));
+        return ResponseEntity.ok().body(new Error("Request auth success (auth token recognized) user: " + token.get()));
     }
 
     private String fitToken(String token) {

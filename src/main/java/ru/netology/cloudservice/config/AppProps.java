@@ -18,4 +18,7 @@ public class AppProps {
     private String storagePath;
     @Value("${cloud.app.storage.io-type}")
     private IoTypes storageIoType;
+    @Value("${cloud.app.check-auth-token}")
+    private boolean checkAuthToken;
+
 }
