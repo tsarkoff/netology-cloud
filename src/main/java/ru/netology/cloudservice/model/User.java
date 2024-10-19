@@ -11,7 +11,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 import ru.netology.cloudservice.repository.UserRepository;
 
 import java.io.Serializable;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
+import java.util.Base64;
 
 @Builder
 @AllArgsConstructor
@@ -63,6 +65,13 @@ public class User {
 
         public void invalidateToken(UserRepository userRepository, User user) {
             authToken = "";
+            userRepository.save(user);
+        }
+
+        public void generateNewToken(UserRepository userRepository, User user) {
+            byte[] randomBytes = new byte[24];
+            new SecureRandom().nextBytes(randomBytes);
+            authToken = Base64.getUrlEncoder().encodeToString(randomBytes);
             userRepository.save(user);
         }
     }

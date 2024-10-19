@@ -15,7 +15,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @CloudExceptionHandlerAdvice
 public class AuthServiceImpl implements AuthService {
-    private final static String AUTH_TOKEN_SAMPLE = "lex34pou5p9834u5n3span394u58u09";
     private final UserRepository userRepository;
 
     @Override
@@ -25,7 +24,7 @@ public class AuthServiceImpl implements AuthService {
         if (user.isEmpty() || !user.get().getCredentials().getPassword().equals(credentials.getPassword()))
             throw new UserNotAuthorizedException(Ops.LOGIN_FAILED, credentials.getLogin());
         if (user.get().getToken().getAuthToken().isEmpty()) {
-            user.get().getToken().setAuthToken(AUTH_TOKEN_SAMPLE); // needs to generate token (e.g. md5 on usr/pwd, or use OAuth2?)
+            user.get().getToken().generateNewToken(userRepository, user.get());
             userRepository.save(user.get());
         }
         return user.get().getToken();
