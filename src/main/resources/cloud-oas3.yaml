@@ -230,7 +230,7 @@ paths:
                     type: integer
                     description: File size in bytes
                     required: true
-                $ref: '#/components/schemas/Success'
+                $ref: '#/components/schemas/Error'
         '400':
           description: Error input data
           content:
