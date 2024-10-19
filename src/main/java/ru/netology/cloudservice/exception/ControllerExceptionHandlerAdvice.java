@@ -10,7 +10,7 @@ import ru.netology.cloudservice.model.Error;
 @RestControllerAdvice(annotations = CloudExceptionHandlerAdvice.class)
 public class ControllerExceptionHandlerAdvice {
 
-    ResponseEntity<Error> r(AbstractCloudException e) {
+    private ResponseEntity<Error> r(AbstractCloudException e) {
         HttpStatus status = e.status;
         Error error = e.getError();
         return ResponseEntity.status(status).body(error);

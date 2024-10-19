@@ -59,7 +59,7 @@ public class User {
     @JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
     public static class Token implements Serializable {
         @Column(name = "auth_token", nullable = false)
-        String authToken = "";
+        private String authToken = "";
 
         public void invalidateToken(UserRepository userRepository, User user) {
             authToken = "";

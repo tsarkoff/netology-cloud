@@ -19,7 +19,7 @@ public class Item {
     private long id;
 
     @Embedded
-    Item.File file;
+    private Item.File file;
 
     @Column(name = "hash", nullable = false)
     private int hash;
