@@ -29,7 +29,7 @@ public class User {
     private Credentials credentials;
 
     @Embedded
-    private User.Token token;
+    private TokenDto token;
 
     @Column(name = "create_dt", nullable = false, updatable = false, insertable = false)
     //@CreationTimestamp
@@ -57,7 +57,7 @@ public class User {
     @NoArgsConstructor
     @Data
     @JsonNaming(PropertyNamingStrategies.KebabCaseStrategy.class)
-    public static class Token implements Serializable {
+    public static class TokenDto implements Serializable {
         @Column(name = "auth_token", nullable = false)
         private String authToken = "";
 

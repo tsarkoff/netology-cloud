@@ -19,7 +19,7 @@ public class Item {
     private long id;
 
     @Embedded
-    private Item.File file;
+    private FileDto file;
 
     @Column(name = "hash", nullable = false)
     private int hash;
@@ -29,7 +29,7 @@ public class Item {
     @AllArgsConstructor
     @NoArgsConstructor
     @Data
-    public static class File {
+    public static class FileDto {
         @Column(name = "filename", nullable = false)
         private String filename;
         @Column(name = "size", nullable = false)
