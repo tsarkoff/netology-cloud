@@ -10,6 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
-    Optional<Item> findItemByFileFilename(String filename);
-    List<Item> findItemByOrderByFileSizeAsc(Limit limitOf);
+    Optional<Item> findItemByOwnerAndFileFilename(String owner, String filename);
+    List<Item> findItemByOwnerOrderByFileSizeAsc(String owner, Limit limitOf);
 }

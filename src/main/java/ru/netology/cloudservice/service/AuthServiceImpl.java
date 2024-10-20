@@ -33,7 +33,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ResultMessageDto logout(Optional<String> token) {
         ResultMessageDto result = validateToken(token);
-        User user = userRepository.findUserByTokenAuthToken(fitToken(token.get())).get();
+        User user = getUserByToken(token).get();
         user.getToken().invalidateToken(userRepository, user);
         return result;
     }
@@ -42,12 +42,23 @@ public class AuthServiceImpl implements AuthService {
     public ResultMessageDto validateToken(Optional<String> token) {
         if (token.isEmpty())
             throw new TokenNotFoundException(Ops.TOKEN_HEADER_ABSENT, "NULL");
-        if (userRepository.findUserByTokenAuthToken(fitToken(token.get())).isEmpty())
+        if (getUserByToken(token).isEmpty())
             throw new TokenNotFoundException(Ops.TOKEN_NOT_FOUND_IN_DB, token.get());
         return new ResultMessageDto("Request success (auth token recognized) user: " + token.get());
     }
 
-    private String fitToken(String token) {
-        return token.replace("Bearer ", "");
+    @Override
+    public Optional<User> getUserByToken(Optional<String> token) {
+        return token.isPresent()
+                ? userRepository.findUserByTokenAuthToken(token.get().replace("Bearer ", ""))
+                : Optional.empty();
+    }
+
+    @Override
+    public String getUsernameByToken(Optional<String> token) {
+        Optional<User> user;
+        return token.isPresent() && (user = getUserByToken(token)).isPresent()
+                ? user.get().getCredentials().getLogin()
+                : "";
     }
 }

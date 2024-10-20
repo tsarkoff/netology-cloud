@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import ru.netology.cloudservice.storage.IoTypes;
+import ru.netology.cloudservice.storage.StorageTypes;
 
 @Configuration
 @ConfigurationProperties(prefix = "cloud.app")
@@ -14,6 +15,8 @@ import ru.netology.cloudservice.storage.IoTypes;
 @PropertySource("classpath:application.properties")
 @Getter
 public class AppProps {
+    @Value("${cloud.app.storage.type}")
+    private StorageTypes storageType;
     @Value("${cloud.app.storage.path}")
     private String storagePath;
     @Value("${cloud.app.storage.io-type}")

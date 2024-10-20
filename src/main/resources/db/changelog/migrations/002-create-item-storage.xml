@@ -19,6 +19,12 @@
             <column name="hash" type="integer">
                 <constraints nullable="false"/>
             </column>
+            <column name="owner" type="varchar(256)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="data" type="bytea">
+                <constraints nullable="true"/>
+            </column>
         </createTable>
     </changeSet>
 </databaseChangeLog>

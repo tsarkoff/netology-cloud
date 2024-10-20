@@ -24,6 +24,12 @@ public class Item {
     @Column(name = "hash", nullable = false)
     private int hash;
 
+    @Column(name = "owner", nullable = false)
+    private String owner;
+
+    @Column(name = "data", nullable = false)
+    private byte[] data;
+
     @Embeddable
     @Builder
     @AllArgsConstructor
