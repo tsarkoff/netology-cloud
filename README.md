@@ -71,9 +71,11 @@
    - Удаление файла, запрос:
      - DELETE http://localhost:8080/file?filename=my_picture.jpg
 2. Внутреннее хранение файлов
-   - файлы хранятся на файловой системе сервиса (с возможностью указания места хранения)
-   - хранение файлов в Базе Данных сервиса: при необходимости, такая доработка возможна
-
+   - в зависимости от настройки cloud.app.storage.type=database || filesystem (application.properties)
+   - файлы хранятся в Базе Данных сервиса (таблица Item)
+   - файлы хранятся на файловой системе сервиса (с возможностью указания места хранения d cloud.app.storage.path)
+   - при хранении на Файловой Системе, каждому пользователю выделяется персональная директория хранения 
+   
 ### Обработка ошибок
    - Ошибка аутентификации: UserNotAuthorizedException
    - Ошибка наличия токена: TokenNotFoundException
@@ -87,6 +89,10 @@
    - Использование встроенной функции logback (Spring) с выводом детальных логов в консоль
    - Расширенное логирование входящих REST-запросов при помощи компонента LoggingInterceptorRest (HandlerInterceptor.preHandle) 
 
+### Тестирование
+   - Реализованы Pure Mockito тесты для Auth Сервиса (AuthServiceTest.java)
+   - Реализованы SpringBoot тесты для File Контроллера (FileControllerTest.java)
+   - Реализованы Интеграционные Testcontainers тесты для File Контроллера (FileControllerIntegrationTest.java)
 
 
 ---

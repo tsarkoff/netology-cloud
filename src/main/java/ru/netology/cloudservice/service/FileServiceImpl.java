@@ -14,6 +14,7 @@ import ru.netology.cloudservice.repository.ItemRepository;
 import ru.netology.cloudservice.storage.Storage;
 import ru.netology.cloudservice.storage.StorageDataBase;
 import ru.netology.cloudservice.storage.StorageFileSystem;
+import ru.netology.cloudservice.storage.StorageTypes;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,7 +31,7 @@ public class FileServiceImpl implements FileService {
     private Storage storage() {
         return switch (props.getStorageType()) {
             case FILESYSTEM -> new StorageFileSystem(props);
-            case DATABASE -> new StorageDataBase();
+            case DATABASE -> new StorageDataBase(itemRepository);
         };
     }
 
@@ -56,9 +57,11 @@ public class FileServiceImpl implements FileService {
         authService.validateToken(token);
         String owner = authService.getUsernameByToken(token);
         storage().write(file, owner);
-        Item.FileDto itemFile = Item.FileDto.builder().filename(file.getOriginalFilename()).size(file.getSize()).build();
-        Item item = Item.builder().file(itemFile).hash(itemFile.hashCode()).owner(owner).build();
-        itemRepository.save(item);
+        if (props.getStorageType().equals(StorageTypes.FILESYSTEM)) {
+            Item.FileDto itemFile = Item.FileDto.builder().filename(file.getOriginalFilename()).size(file.getSize()).build();
+            Item item = Item.builder().file(itemFile).hash(itemFile.hashCode()).owner(owner).build();
+            itemRepository.save(item);
+        }
         return new ResultMessageDto("File upload success, file: " + filename);
     }
 
@@ -69,7 +72,8 @@ public class FileServiceImpl implements FileService {
         Optional<Item> item = itemRepository.findItemByOwnerAndFileFilename(owner, oldFilename);
         if (item.isEmpty())
             throw new FileNotFoundInDatabaseException(Ops.FILE_UPDATE, oldFilename);
-        storage().rename(oldFilename, newFilename, owner);
+        if (props.getStorageType().equals(StorageTypes.DATABASE))
+            storage().rename(oldFilename, newFilename, owner);
         item.get().getFile().setFilename(newFilename);
         itemRepository.save(item.get());
         return new ResultMessageDto("File update success, new filename: " + newFilename);
@@ -82,7 +86,8 @@ public class FileServiceImpl implements FileService {
         Optional<Item> item = itemRepository.findItemByOwnerAndFileFilename(owner, filename);
         if (item.isEmpty())
             throw new FileNotFoundInDatabaseException(Ops.FILE_DELETE, filename);
-        storage().delete(filename, owner);
+        if (props.getStorageType().equals(StorageTypes.DATABASE))
+            storage().delete(filename, owner);
         item.ifPresent(itemRepository::delete);
         return new ResultMessageDto("File delete success, file: " + filename);
     }
